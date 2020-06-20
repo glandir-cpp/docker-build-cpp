@@ -1,0 +1,99 @@
+#!/bin/sh
+
+# Usage: make-with-sanitizer [MAKE_TARGET...]
+# Run in the source directory (directory containing the root CMakeLists.txt)
+# of a cmake project.
+#
+# Respects the following environment variables:
+
+# C++ compiler
+# CXX=
+
+# C compiler
+# CC=
+
+# Sanitizer to use.
+# CI_SANITIZER={address,memory,thread,undefined,tidy,none}
+#
+# MSan and clang-tidy only work with the clang compiler.
+# MSan additionally requires an instrumented version of libcxx; see below.
+CI_SANITIZER=${CI_SANITIZER:-none}
+
+# Cmake build type.
+CI_BUILD_TYPE=${CI_BUILD_TYPE:-'RelWithDebInfo'}
+
+# Build location, relative to source directory.
+CI_BUILD_DIR="${CI_BUILD_DIR:-build-$CI_SANITIZER-$CXX-$CI_BUILD_TYPE}"
+
+# Additional options to be passed to cmake.
+CI_CMAKE_OPTS="-DCMAKE_BUILD_TYPE=$CI_BUILD_TYPE $CI_CMAKE_OPTS"
+
+# The path to the build output of an MSan-instrumented libcxx build.
+# MSAN_LIBCXX_PATH=
+
+
+set -e
+
+only_clang() {
+	[ "${CXX:0:7}" = "clang++" -a "${CC:0:5}" = "clang" ] || {
+		1>&2 echo "$CI_SANITIZER only works with clang. Set CXX='clang++' CC='clang'."
+		exit -1
+	}
+
+}
+
+set_msan_flags() {
+	local libcxx_flags="\
+-stdlib=libc++ -nostdinc++ \
+-I$MSAN_LIBCXX_PATH/include \
+-I$MSAN_LIBCXX_PATH/include/c++/v1 \
+-L$MSAN_LIBCXX_PATH/lib \
+-Wl,-rpath,$MSAN_LIBCXX_PATH/lib \
+-lc++abi \
+"
+
+	_san_flags="\
+-Wno-unused-command-line-argument \
+$libcxx_flags \
+-fsanitize=memory \
+-fno-omit-frame-pointer \
+"
+}
+
+case "$CI_SANITIZER" in
+	"address")
+		_san_flags="-fsanitize=address"
+		;;
+	"memory")
+		only_clang
+		set_msan_flags
+		;;
+	"thread")
+		_san_flags="-fsanitize=thread"
+		;;
+	"tidy")
+		only_clang
+		CI_CMAKE_OPTS="-DCMAKE_CXX_CLANG_TIDY=clang-tidy;-config=;-warnings-as-errors=*;-quiet $CI_CMAKE_OPTS"
+		;;
+	"undefined")
+		_san_flags="-fsanitize=undefined -fno-sanitize-recover=all -DUBSAN_DEATHTEST"
+		;;
+	"none")
+		;;
+	*)
+		1>&2 echo "Unknown sanitizer (CI_SANITIZER=$CI_SANITIZER)."
+		exit -1
+		;;
+esac
+
+export CXXFLAGS="$CXXFLAGS $_san_flags"
+
+_source_dir=$PWD
+mkdir -p "$CI_BUILD_DIR"
+cd "$CI_BUILD_DIR"
+
+export GTEST_COLOR=1
+export CTEST_OUTPUT_ON_FAILURE=1
+
+cmake $CI_CMAKE_OPTS $_source_dir &&
+	make $@
