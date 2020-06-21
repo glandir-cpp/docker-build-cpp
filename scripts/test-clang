@@ -1,0 +1,17 @@
+#!/bin/sh
+
+# Usage: test-clang [MAKE_TARGET...]
+
+set -e
+
+script_dir=$(realpath $(dirname "$0"))
+
+export CXX=clang++
+export CC=clang
+
+CI_SANITIZER=address    "$script_dir"/make-with-sanitizer $@
+CI_SANITIZER=memory     "$script_dir"/make-with-sanitizer $@
+CI_SANITIZER=thread     "$script_dir"/make-with-sanitizer $@
+CI_SANITIZER=undefined  "$script_dir"/make-with-sanitizer $@
+CI_SANITIZER=tidtidy    "$script_dir"/make-with-sanitizer $@
+
