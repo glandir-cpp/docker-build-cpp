@@ -6,8 +6,8 @@ set -e
 
 script_dir=$(realpath $(dirname "$0"))
 
-export CXX=g++
-export CC=gcc
+export CXX=${CXX:-g++}
+export CC=${CC:-gcc}
 
 CI_SANITIZER=address    "$script_dir"/make-with-sanitizer $@
 CI_SANITIZER=thread     "$script_dir"/make-with-sanitizer $@
