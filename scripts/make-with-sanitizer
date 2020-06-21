@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # Usage: make-with-sanitizer [MAKE_TARGET...]
 # Run in the source directory (directory containing the root CMakeLists.txt)
