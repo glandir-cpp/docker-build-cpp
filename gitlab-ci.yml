@@ -1,0 +1,23 @@
+variables:
+    GIT_SUBMODULE_STRATEGY: recursive
+
+stages:
+    - test
+
+test-clang:
+    stage: test
+    image: 'glandir/build-cpp:clang-10'
+    script:
+        - scripts/test-clang all test
+
+test-msan-clang:
+    stage: test
+    image: 'glandir/build-cpp:msan-clang-10'
+    script:
+        - CI_SANITIZER=memory scripts/make-with-sanitizer all test
+
+test-gcc:
+    stage: test
+    image: 'glandir/build-cpp:gcc-9'
+    script:
+        - scripts/test-gcc all test
