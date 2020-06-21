@@ -28,6 +28,9 @@ CI_BUILD_DIR="${CI_BUILD_DIR:-build-$CI_SANITIZER-$CXX-$CI_BUILD_TYPE}"
 # Additional options to be passed to cmake.
 CI_CMAKE_OPTS="-DCMAKE_BUILD_TYPE=$CI_BUILD_TYPE $CI_CMAKE_OPTS"
 
+# Name of the clang-tidy excutable
+CI_CLANG_TIDY="${CI_CLANG_TIDY:-clang-tidy}"
+
 # The path to the build output of an MSan-instrumented libcxx build.
 # MSAN_LIBCXX_PATH=
 
@@ -73,7 +76,7 @@ case "$CI_SANITIZER" in
 		;;
 	"tidy")
 		only_clang
-		CI_CMAKE_OPTS="-DCMAKE_CXX_CLANG_TIDY=clang-tidy;-config=;-warnings-as-errors=*;-quiet $CI_CMAKE_OPTS"
+		CI_CMAKE_OPTS="-DCMAKE_CXX_CLANG_TIDY=$CI_CLANG_TIDY;-config=;-warnings-as-errors=*;-quiet $CI_CMAKE_OPTS"
 		;;
 	"undefined")
 		_san_flags="-fsanitize=undefined -fno-sanitize-recover=all -DUBSAN_DEATHTEST"
