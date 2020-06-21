@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Usage: build-libcxx_msan OUTPUT_PATH
+# Populates $OUTPUT_PATH/libcxx_msan/{include,lib}.
+
+set -e
+
+source_path="$1"
+
+git clone --depth=1 https://github.com/llvm/llvm-project
+mkdir $source_path/libcxx_msan
+cd $source_path/libcxx_msan
+cmake ../llvm-project/llvm                            \
+ -DCMAKE_BUILD_TYPE=Release                           \
+ -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi"            \
+ -DLLVM_USE_SANITIZER=MemoryWithOrigins
+make -j4 cxx cxxabi
+rm -rf $source_path/llvm-project
