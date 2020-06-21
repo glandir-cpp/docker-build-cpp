@@ -7,7 +7,7 @@ set -e
 script_dir=$(realpath $(dirname "$0"))
 
 export CXX=${CXX:-clang++}
-export CC=${CXX:-clang}
+export CC=${CC:-clang}
 
 CI_SANITIZER=address    "$script_dir"/make-with-sanitizer $@
 CI_SANITIZER=memory     "$script_dir"/make-with-sanitizer $@
