@@ -22,8 +22,11 @@ CI_SANITIZER=${CI_SANITIZER:-none}
 # Cmake build type.
 CI_BUILD_TYPE=${CI_BUILD_TYPE:-'RelWithDebInfo'}
 
+# If CI_BUILD_DIR is not set, this is where the build directory will be placed.
+CI_BUILD_PREFIX=${CI_BUILD_PREFIX:-ci/}
+
 # Build location, relative to source directory.
-CI_BUILD_DIR="${CI_BUILD_DIR:-build-$CI_SANITIZER-$CXX-$CI_BUILD_TYPE}"
+CI_BUILD_DIR="${CI_BUILD_DIR:-${CI_BUILD_PREFIX}build-$CI_SANITIZER-$CXX-$CI_BUILD_TYPE}"
 
 # Additional options to be passed to cmake.
 CI_CMAKE_OPTS="-DCMAKE_BUILD_TYPE=$CI_BUILD_TYPE $CI_CMAKE_OPTS"
