@@ -14,7 +14,7 @@ test-msan-clang:
     stage: test
     image: 'glandir/build-cpp:msan-clang-10'
     script:
-        - CI_SANITIZER=memory scripts/make-with-sanitizer all test
+        - scripts/test-msan-clang all test
 
 test-gcc:
     stage: test
