@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
 	git                                  \
 	&& rm -rf /var/lib/apt/lists/*
 
-COPY build-libcxx_msan .
-RUN ./build-libcxx_msan . && rm build-libcxx_msan
-
 ENV MSAN_LIBCXX_PATH="/usr/src/libcxx_msan"
+COPY build-libcxx_msan .
+RUN ./build-libcxx_msan && rm build-libcxx_msan
+

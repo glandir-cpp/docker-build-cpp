@@ -1,18 +1,37 @@
 #!/bin/sh
 
-# Usage: build-libcxx_msan OUTPUT_PATH
-# Populates $OUTPUT_PATH/libcxx_msan/{include,lib}.
+# Usage: build-libcxx_msan [OUTPUT_PATH]
+#
+# Clones and builds libcxx instrumented with MSan.
+# Build output goes into OUTPUT_PATH if is supplied,
+# otherwise into $MSAN_LIBCXX_PATH.
+#
+# The test-msan-clang script uses that same variable, so it's best to
+# just set to the desired path before using these scripts.
 
 set -e
 
-source_path="$1"
+source_path="${1:-$MSAN_LIBCXX_PATH}"
+[ "$source_path" ] || {
+	{
+		1>&2 echo "No output path set. Stopping."
+		1>&2 echo "Supply an output path either as argument or by setting MSAN_LIBCXX_PATH."
+	}
+	exit 1
+}
+
+export CXX=${CXX:-clang++}
+export CC=${CC:-clang}
+
+mkdir -p "$source_path"
+cd "$source_path"
 
 git clone --depth=1 https://github.com/llvm/llvm-project
-mkdir $source_path/libcxx_msan
-cd $source_path/libcxx_msan
-cmake ../llvm-project/llvm                            \
- -DCMAKE_BUILD_TYPE=Release                           \
- -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi"            \
+
+cmake llvm-project/llvm                    \
+ -DCMAKE_BUILD_TYPE=Release                \
+ -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" \
  -DLLVM_USE_SANITIZER=MemoryWithOrigins
 make -j4 cxx cxxabi
-rm -rf $source_path/llvm-project
+
+rm -rf llvm-project

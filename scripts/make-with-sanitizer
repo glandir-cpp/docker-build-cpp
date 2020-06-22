@@ -36,8 +36,8 @@ CI_CLANG_TIDY="${CI_CLANG_TIDY:-clang-tidy}"
 
 # The path to the build output of an MSan-instrumented libcxx build.
 #
-# To use MSan, run `dockerfiles/msan-clan/build-libcxx_msan /path/to/output_dir`
-# and `export MSAN_LIBCXX_PATH=/path/t0/output_dir/libcxx_msan`.
+# To build libcxx with MSan, export MSAN_LIBCXX_PATH with the desired path,
+# then run `dockerfiles/msan-clang/build-libcxx_msan`
 #
 # MSAN_LIBCXX_PATH=
 
