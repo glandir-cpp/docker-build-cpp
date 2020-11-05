@@ -72,7 +72,7 @@ $libcxx_flags \
 
 case "$CI_SANITIZER" in
 	"address")
-		_san_flags="-fsanitize=address"
+		_san_flags="-fsanitize=address -fno-omit-frame-pointer -fno-optimize-sibling-calls"
 		;;
 	"memory")
 		only_clang
